@@ -1,0 +1,13 @@
+{
+    "matchListUrl": "https://allpanel777.now/fantasy/our",
+    "matchTitle": "Australia vs India T20I",
+    "players": {
+        "WK": ["Sanju Samson"],
+        "Bat": ["Suryakumar Yadav", "Travis Head", "Tim David", "Rinku Singh"],
+        "AR": ["Glenn Maxwell", "Abhishek Sharma", "Axar Patel"],
+        "Bowl": ["Jasprit Bumrah", "Kuldeep Yadav", "Varun Chakravarthy"]
+    },
+    "captain": "Tim David",
+    "viceCaptain": "Suryakumar Yadav",
+    "contestAmount": 10
+}

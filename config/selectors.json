@@ -1,0 +1,59 @@
+{
+    "login": {
+        "triggers": [
+            "role=button[name=/login/i]",
+            "a:has-text('Login')",
+            "button:has-text('Login')",
+            "a[href='/login']",
+            "[data-target='#login']",
+            "[aria-controls='login']",
+            ".login-btn",
+            ".header-login",
+            ".open-login",
+            "#open-login",
+            "text=/^sign in$/i"
+        ],
+        "modalRoot": "#login .modal-content, .modal-login-new .modal-content, .modal-dialog .modal-content",
+        "form": ".login-form",
+        "username": "input[placeholder='Enter Username']",
+        "password": "input[placeholder='Enter Password']",
+        "ageCheckbox": "#customCheck",
+        "submitWithinForm": ":scope button[type='submit'], :scope button.btn.btn-primary.btn-block",
+        "errorText": "text=/invalid|incorrect|failed|try again|user name required|password required/i",
+        "postLoginSentinel": "text=/logout|my account|wallet|profile/i"
+    },
+    "game": {
+        "ourUrl": "https://allpanel777.now/fantasy/our",
+        "ourContainer": "#fantacyListTarget",
+        "diam11Card": "#fantacyListTarget .casino-banner-item:has(div[style*='diam11'])",
+        "diam11PlayIcon": "#fantacyListTarget .casino-banner-item:has(div[style*='diam11']) .fancy-play .fa-play",
+        "embeddedFrameUrlRe": "realteam11\\.com\\/dream",
+        "matchListContainer": ".league-list",
+        "matchLink": ".league-list a",
+        "postEntrySentinel": "text=/upcoming matches|my matches|contests|view all/i",
+        "contestEntryButton": ".contest-list .entry-button",
+        "activePane": ".tab-content .tab-pane.active",
+        "teamTabs": ".nav.nav-tabs .nav-link",
+        "tabSelectedAttr": "[aria-selected='true']",
+        "playerListContainer": ".player-category-list-container",
+        "playerRow": ".player-category-list",
+        "playerNameCell": ".player-name",
+        "playerAddButton": ".player-add-remove i.fa-plus-circle",
+        "playerMinusButton": ".player-add-remove i.fa-minus-circle",
+        "continueButtonCandidates": [
+            ".team-preview .btn.btn-secondary",
+            ".team-preview button:has-text('Continue')",
+            ".team-preview button:has-text('Contine')",
+            "button.btn.btn-secondary:has-text('Continue')",
+            "button.btn.btn-secondary:has-text('Contine')",
+            "button:has-text('Next')",
+            "button:has-text('Save Team')"
+        ],
+        "teamTabTextMap": {
+            "WK": "WK",
+            "Bat": "Bat",
+            "AR": "AR",
+            "Bowl": "Bowl"
+        }
+    }
+}
