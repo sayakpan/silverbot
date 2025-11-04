@@ -5,16 +5,28 @@ import { loginWithModal } from './login-modal.js';
 import { openDiam11AndSelectMatch } from './navigate-game.js';
 import { createTeam } from './create-team.js';
 import { joinContestByAmount } from './join-contest.js';
-import { appendResultRow } from './result-logger.js';
+import { appendResultRow, appendFailedCredential, clearFile } from './result-logger.js';
 
-export async function runAll({ env, onlyLogin = false }) {
+export async function runAll({ env, onlyLogin = false, fromFailed = false }) {
     const BASE_URL = env.BASE_URL || 'https://silverbet777.club';
     const HEADLESS = String(env.HEADLESS || 'false') === 'true';
     const MAX_CONCURRENT = Number(env.MAX_CONCURRENT || 3);
 
-    const accounts = readCSV('config/accounts.csv');
+    const failedPath = 'artifacts/last_failed.csv';
+    if (!fromFailed) {
+        await clearFile(failedPath);
+    }
+
+    const accounts = await loadAccounts(fromFailed, failedPath);
     const selectors = readJSON('config/selectors.json');
     const team = safeReadJSON('config/team.json'); // optional file
+    if (!team || !team.matchTitle || !team.players || !team.captain || !team.viceCaptain || typeof team.contestAmount !== 'number') {
+        throw new Error('Invalid or missing config/team.json. Required: matchTitle, players, captain, viceCaptain, contestAmount');
+    }
+
+    console.log(
+        `Starting run: match="${team.matchTitle}", contestAmount=${team.contestAmount}, accounts=${accounts.length}, headless=${HEADLESS}, max_concurrent=${MAX_CONCURRENT}`
+    );
 
     const browser = await chromium.launch({
         headless: HEADLESS,
@@ -48,16 +60,32 @@ async function runOne(browser, index, account, ctx) {
     try {
         await loginWithModal(page, BASE_URL, selectors, account.username, account.password);
         step = 'login_done';
+
         const matchTitleRegex = new RegExp(matchTitle, 'i');
         const frame = await openDiam11AndSelectMatch(page, selectors, matchTitleRegex);
         step = 'match_opened';
+
+        if (onlyLogin) {
+            console.log(`Test Success For: ${account.username}`);
+            await appendResultRow('artifacts/results.csv', {
+                timestamp: new Date().toISOString(),
+                match_title: matchTitle || '',
+                username: account.username,
+                status: 'test success',
+                step: step,
+                duration_ms: Date.now() - t0
+            });
+            await context.close();
+            return;
+        }
+
         const result = await createTeam(frame, selectors, team);
         step = 'team_created';
         const gameFrame = result.frame;
         await joinContestByAmount(gameFrame, team.contestAmount, result.status);
         step = 'contest_joined';
 
-        console.log(`OK flow-start: ${account.username}`);
+        console.log(`Success For: ${account.username}`);
         await appendResultRow('artifacts/results.csv', {
             timestamp: new Date().toISOString(),
             match_title: matchTitle,
@@ -81,16 +109,37 @@ async function runOne(browser, index, account, ctx) {
         });
 
         try {
-            await page.screenshot({
-                path: `artifacts/fail-${Date.now()}-${sanitize(account.username)}-${step}.png`,
-                fullPage: true
+            await appendFailedCredential(ctx.failedPath, {
+                username: account.username,
+                password: account.password
             });
         } catch {}
+
+        try {
+            await page.screenshot({
+                path: `artifacts/${sanitize(account.username)}-fail-${Date.now()}-${step}.png`,
+                fullPage: true
+            });
+        } catch { }
     } finally {
         await context.close();
         await sleep(jitter(250, 800));
     }
 }
+
+async function loadAccounts(fromFailed, failedPath) {
+    if (fromFailed) {
+        try {
+            const rows = readCSV(failedPath);
+            if (!rows.length) throw new Error('no_failed_accounts');
+            return rows;
+        } catch {
+            throw new Error('no_failed_accounts_file');
+        }
+    }
+    return readCSV('config/accounts.csv');
+}
+
 
 function sanitize(s) {
     return String(s).replace(/[^a-z0-9_\-\.]+/gi, '_');

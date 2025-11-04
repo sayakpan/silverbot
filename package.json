@@ -5,7 +5,8 @@
     "scripts": {
         "start": "node src/index.js",
         "run": "node src/index.js",
-        "test": "node src/index.js"
+        "test": "node src/index.js --only=login",
+        "failed": "node src/index.js --from=failed"
     },
     "dependencies": {
         "csv-parse": "^5.5.6",

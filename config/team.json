@@ -1,13 +1,13 @@
 {
     "matchListUrl": "https://allpanel777.now/fantasy/our",
-    "matchTitle": "Australia vs India T20I",
+    "matchTitle": "New Zealand vs West Indies T20I",
     "players": {
-        "WK": ["Sanju Samson"],
-        "Bat": ["Suryakumar Yadav", "Travis Head", "Tim David", "Rinku Singh"],
-        "AR": ["Glenn Maxwell", "Abhishek Sharma", "Axar Patel"],
-        "Bowl": ["Jasprit Bumrah", "Kuldeep Yadav", "Varun Chakravarthy"]
+        "WK": ["Devon Conway"],
+        "Bat": ["Daryl Mitchell", "Rachin Ravindra", "Brandon King", "Sherfane Rutherford"],
+        "AR": ["Mitchell Santner", "Michael Bracewell", "Jason Holder"],
+        "Bowl": ["Akeal Hosein", "Ish Sodhi", "Kyle Jamieson"]
     },
-    "captain": "Tim David",
-    "viceCaptain": "Suryakumar Yadav",
-    "contestAmount": 10
+    "captain": "Mitchell Santner",
+    "viceCaptain": "Rachin Ravindra",
+    "contestAmount": 500
 }

@@ -44,3 +44,16 @@ export async function appendResultRow(filePath, rowObj) {
     // append atomically enough for our usage; concurrent appends are fine
     await fs.appendFile(filePath, line, 'utf8');
 }
+
+export async function clearFile(filePath) {
+    try {
+        await fs.unlink(filePath);
+    } catch {}
+}
+
+export async function appendFailedCredential(filePath, cred) {
+    const header = ['username', 'password'];
+    await ensureHeader(filePath, header);
+    const line = [cred.username || '', cred.password || ''].map(csvEscape).join(',') + '\n';
+    await fs.appendFile(filePath, line, 'utf8');
+}
