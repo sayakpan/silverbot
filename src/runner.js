@@ -6,6 +6,7 @@ import { openDiam11AndSelectMatch } from './navigate-game.js';
 import { createTeam } from './create-team.js';
 import { joinContestByAmount } from './join-contest.js';
 import { appendResultRow, appendFailedCredential, clearFile } from './result-logger.js';
+import { promises as fsp } from 'fs';
 
 export async function runAll({ env, onlyLogin = false, fromFailed = false }) {
     const BASE_URL = env.BASE_URL || 'https://silverbet777.club';
@@ -13,7 +14,13 @@ export async function runAll({ env, onlyLogin = false, fromFailed = false }) {
     const MAX_CONCURRENT = Number(env.MAX_CONCURRENT || 3);
 
     const failedPath = 'artifacts/last_failed.csv';
-    if (!fromFailed) {
+    const nextFailedPath = fromFailed ? 'artifacts/next_failed.csv' : failedPath;
+
+    console.log("Failed Run:", fromFailed)
+
+    if (fromFailed) {
+        await clearFile(nextFailedPath);
+    } else {
         await clearFile(failedPath);
     }
 
@@ -41,17 +48,39 @@ export async function runAll({ env, onlyLogin = false, fromFailed = false }) {
                 selectors,
                 team,
                 onlyLogin,
-                matchTitle: team.matchTitle
+                matchTitle: team.matchTitle,
+                failedOutPath: nextFailedPath
             })
         )
     );
 
     await Promise.all(tasks);
     await browser.close();
+
+    // finalize failed-set file behavior
+    if (fromFailed) {
+        try {
+            // If we produced a fresh set this run, replace last_failed.csv with it
+            const stat = await fsp.stat(nextFailedPath).catch(() => null);
+
+            if (stat && stat.size > 0) {
+                // Ensure target dir exists (usually already does)
+                await fsp.rename(nextFailedPath, failedPath);
+            } else {
+                // No failures this run -> ensure last_failed.csv is cleared
+                await fsp.unlink(failedPath).catch(() => { });
+                // Also remove empty temp if it exists
+                await fsp.unlink(nextFailedPath).catch(() => { });
+            }
+        } catch {
+            // As a fallback, ensure temp file is removed if present
+            await fsp.unlink(nextFailedPath).catch(() => { });
+        }
+    }
 }
 
 async function runOne(browser, index, account, ctx) {
-    const { BASE_URL, selectors, team, onlyLogin, matchTitle } = ctx;
+    const { BASE_URL, selectors, team, onlyLogin, matchTitle, failedOutPath } = ctx;
     const context = await browser.newContext({ viewport: { width: 1300, height: 850 } });
     const page = await context.newPage();
     const t0 = Date.now();
@@ -109,15 +138,15 @@ async function runOne(browser, index, account, ctx) {
         });
 
         try {
-            await appendFailedCredential(ctx.failedPath, {
+            await appendFailedCredential(failedOutPath, {
                 username: account.username,
                 password: account.password
             });
-        } catch {}
+        } catch { }
 
         try {
             await page.screenshot({
-                path: `artifacts/${sanitize(account.username)}-fail-${Date.now()}-${step}.png`,
+                path: `artifacts/images/${sanitize(account.username)}-fail-${Date.now()}-${step}.png`,
                 fullPage: true
             });
         } catch { }
