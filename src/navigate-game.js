@@ -6,7 +6,7 @@ function ensureString(name, v) {
     }
 }
 
-export async function openDiam11AndSelectMatch(page, selectors, matchTitleRegex) {
+export async function openDiam11AndSelectMatch(page, selectors, matchTitleRegex, matchId) {
     if (!page) throw new Error('page not provided');
     const s = selectors?.game;
     if (!s) throw new Error('selectors.game is missing');
@@ -59,8 +59,20 @@ export async function openDiam11AndSelectMatch(page, selectors, matchTitleRegex)
     const listing = frame.locator(s.matchListContainer).first();
     await listing.waitFor({ state: 'visible', timeout: 15000 });
 
-    const link = frame.locator(s.matchLink, { hasText: matchTitleRegex }).first();
-    await link.waitFor({ state: 'visible', timeout: 10000 });
+    // const link = frame.locator(s.matchLink, { hasText: matchTitleRegex }).first();
+    // await link.waitFor({ state: 'visible', timeout: 10000 });
+    // await link.click({ timeout: 8000 });
+    // If matchId is provided, prefer selecting by exact href
+    let link;
+    if (matchId) {
+        link = frame.locator(`a[href="/league/contests/${matchId}/contests"]`).first();
+        await link.waitFor({ state: 'visible', timeout: 10000 });
+    } else {
+        // fallback to match title text
+        link = frame.locator(s.matchLink, { hasText: matchTitleRegex }).first();
+        await link.waitFor({ state: 'visible', timeout: 10000 });
+    }
+
     await link.click({ timeout: 8000 });
 
     // 6) Confirm we landed into a league/contests page (still inside the same iframe)

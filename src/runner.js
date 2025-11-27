@@ -91,7 +91,8 @@ async function runOne(browser, index, account, ctx) {
         step = 'login_done';
 
         const matchTitleRegex = new RegExp(matchTitle, 'i');
-        const frame = await openDiam11AndSelectMatch(page, selectors, matchTitleRegex);
+        const matchId = team.matchId ? String(team.matchId) : null;
+        const frame = await openDiam11AndSelectMatch(page, selectors, matchTitleRegex, matchId);
         step = 'match_opened';
 
         if (onlyLogin) {
